@@ -1,0 +1,185 @@
+[tool.poetry]
+name = "to-do-list-flask"
+version = "0.1.0"
+description = ""
+authors = ["Denis Maslennikov <ktotom7@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.3"
+sqlalchemy = "^2.0.35"
+flask-restx = "^1.3.0"
+psycopg2-binary = "^2.9.9"
+alembic = "^1.13.3"
+bcrypt = "^4.2.0"
+pyjwt = "^2.9.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.7"
+black = "^24.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+include = ["pyproject.toml", "*.py"]
+
+# Длина строки
+line-length = 120
+
+# Предположим, что Python 3.12
+target-version = "py312"
+
+[tool.ruff.lint]
+# Список кодов или префиксов правил, которые необходимо включить.
+# Префиксы могут указывать точные правила (например, F841), целые категории (например, F) или все, что находится между ними.
+# Pyflakes (F) https://docs.astral.sh/ruff/rules/#pyflakes-f
+# pycodestyle (E, W) https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+# mccabe (C90) https://docs.astral.sh/ruff/rules/#mccabe-c90
+# isort (I) https://docs.astral.sh/ruff/rules/#isort-i
+# Выключен из за названия классов в моделях pep8-naming (N) https://docs.astral.sh/ruff/rules/#pep8-naming-n
+# pydocstyle (D) https://docs.astral.sh/ruff/rules/#pydocstyle-d
+# flake8-quotes (Q) https://docs.astral.sh/ruff/rules/#flake8-quotes-q
+# flynt (FLY) https://docs.astral.sh/ruff/rules/#flynt-fly
+select = ["F", "E", "W", "C90", "I", "D", "Q", "FLY", ]
+
+# Расширяет набор правил
+# E111 Indentation is not a multiple of {indent_size} https://docs.astral.sh/ruff/rules/indentation-with-invalid-multiple/
+# E201 Whitespace after '{symbol}' https://docs.astral.sh/ruff/rules/whitespace-after-open-bracket/
+# E202 Whitespace before '{symbol}' https://docs.astral.sh/ruff/rules/whitespace-before-close-bracket/
+# E203 Whitespace before '{symbol}' https://docs.astral.sh/ruff/rules/whitespace-before-punctuation/
+# E211 Whitespace before '{bracket}' https://docs.astral.sh/ruff/rules/whitespace-before-parameters/
+# E221 Multiple spaces before operator https://docs.astral.sh/ruff/rules/multiple-spaces-before-operator/
+# E222 Multiple spaces after operator https://docs.astral.sh/ruff/rules/multiple-spaces-after-operator/
+# E225 Missing whitespace around operator https://docs.astral.sh/ruff/rules/missing-whitespace-around-operator/
+# E226 Missing whitespace around arithmetic operator https://docs.astral.sh/ruff/rules/missing-whitespace-around-arithmetic-operator/
+# E231 Missing whitespace after '{token}' https://docs.astral.sh/ruff/rules/missing-whitespace/
+# E241 Multiple spaces after comma https://docs.astral.sh/ruff/rules/multiple-spaces-after-comma/
+# E251 Unexpected spaces around keyword / parameter equals https://docs.astral.sh/ruff/rules/unexpected-spaces-around-keyword-parameter-equals/
+# E261 Insert at least two spaces before an inline comment https://docs.astral.sh/ruff/rules/too-few-spaces-before-inline-comment/
+# E262 Inline comment should start with # https://docs.astral.sh/ruff/rules/no-space-after-inline-comment/
+# E265 Block comment should start with # https://docs.astral.sh/ruff/rules/no-space-after-block-comment/
+# E266 Too many leading # before block comment https://docs.astral.sh/ruff/rules/multiple-leading-hashes-for-block-comment/
+# E271 Multiple spaces after keyword https://docs.astral.sh/ruff/rules/multiple-spaces-after-keyword/
+# E272 Multiple spaces before keyword https://docs.astral.sh/ruff/rules/multiple-spaces-before-keyword/
+# E275 Missing whitespace after keyword https://docs.astral.sh/ruff/rules/missing-whitespace-after-keyword/
+# E302 Expected {expected_blank_lines:?} blank lines, found {actual_blank_lines} https://docs.astral.sh/ruff/rules/blank-lines-top-level/
+# E303 Too many blank lines ({actual_blank_lines}) https://docs.astral.sh/ruff/rules/too-many-blank-lines/
+# E304 Blank lines found after function decorator ({lines}) https://docs.astral.sh/ruff/rules/blank-line-after-decorator/
+# E305 Expected 2 blank lines after class or function definition, found ({blank_lines}) https://docs.astral.sh/ruff/rules/blank-lines-after-function-or-class/
+# E306 Expected 1 blank line before a nested definition, found 0 https://docs.astral.sh/ruff/rules/blank-lines-before-nested-definition/
+# E502 Redundant backslash https://docs.astral.sh/ruff/rules/redundant-backslash/
+# W391 Too many newlines at end of file https://docs.astral.sh/ruff/rules/too-many-newlines-at-end-of-file/
+extend-select = [
+  "E111",
+  "E201", "E202", "E203", "E211", "E221", "E222", "E225", "E226", "E231", "E241", "E251", "E261", "E262", "E265", "E266", "E271", "E272", "E275",
+  "E302", "E303", "E304", "E305", "E306",
+  "E502",
+  "W391",
+]
+
+# Выбор отдельных правил предварительного просмотра
+preview = true
+explicit-preview-rules = true
+
+# F821 Undefined name https://docs.astral.sh/ruff/rules/undefined-name/
+# C901 is too complex https://docs.astral.sh/ruff/rules/complex-structure/
+# D100 undocumented-public-module https://docs.astral.sh/ruff/rules/undocumented-public-module/
+# D104 undocumented-public-package https://docs.astral.sh/ruff/rules/undocumented-public-package/
+# D105 undocumented-magic-method https://docs.astral.sh/ruff/rules/undocumented-magic-method/
+# D203 one-blank-line-before-class https://docs.astral.sh/ruff/rules/one-blank-line-before-class/
+# D212 multi-line-summary-first-line https://docs.astral.sh/ruff/rules/multi-line-summary-first-line/
+# D400 ends-in-period https://docs.astral.sh/ruff/rules/ends-in-period/
+ignore = [
+  "F821",
+  "C901",
+  "D100", "D104", "D105", "D203", "D212", "D400",
+]
+
+# Список игнорируемых каталогов.
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "migrations",
+  "alembic/*",
+]
+per-file-ignores = { }
+
+# Разрешить неиспользуемые переменные при использовании префикса подчёркивания.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Как и в Black, используйте двойные кавычки для строк.
+quote-style = "single"
+
+# Как и в случае с Black, делайте отступы с помощью пробелов, а не табуляции.
+indent-style = "space"
+
+# Как и Блэк, уважайте магические запятые в конце текста.
+skip-magic-trailing-comma = false
+
+# Как и Black, автоматически определяет подходящее окончание строки.
+line-ending = "lf"
+
+# Включите автоформатирование примеров кода в документах. Markdown,
+# reStructuredText блоки кода/литературы и doctests поддерживаются.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+# isort   https://docs.astral.sh/ruff/settings/#isort
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+# Use a single line after each import block.
+#lines-after-imports = 2
+
+# pydocstyle   https://docs.astral.sh/ruff/settings/#pydocstyle
+[tool.ruff.lint.pydocstyle]
+convention = "google" # https://betterprogramming.pub/3-different-docstring-formats-for-python-d27be81e0d68
+
+# flake8-quotes
+[tool.ruff.lint.flake8-quotes]
+# Следует ли избегать использования одинарных кавычек, если строка содержит одинарные кавычки,
+# или наоборот, двойных кавычек, как в PEP 8.
+# Это сводит к минимуму необходимость экранировать кавычки внутри строк.
+avoid-escape = true
+# Стиль кавычек, предпочитаемый для строк документации (одинарный или двойной).
+docstring-quotes = "double"
+# Стиль кавычек, предпочитаемый для встроенных строк (одинарный или двойной).
+inline-quotes = "double"
+# Стиль кавычек, предпочитаемый для многострочных строк (одинарный или двойной).
+multiline-quotes = "single"
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]

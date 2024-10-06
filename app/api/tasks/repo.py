@@ -1,0 +1,43 @@
+from sqlalchemy.orm import Session
+from werkzeug.exceptions import BadRequest
+
+from app.models import Task
+from constants import MAX_AMOUNT_OF_TASKS
+
+
+def get_task_list_for_user_repo(
+    session: Session,
+    user_id: str,
+    title: str | None = None,
+    task_status_id: int | None = None,
+    sort_fields: str | None = None,
+    sort_order: str | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
+) -> list[Task]:
+    """Получение списка задач из базы."""
+
+    query = session.query(Task).filter(Task.user_id == user_id)
+
+    if title is not None:
+        query = query.filter(Task.title.icontains(title))
+    if task_status_id is not None:
+        query = query.filter(Task.task_status_id == task_status_id)
+
+    if sort_fields is not None:
+        if hasattr(Task, sort_fields) and sort_fields in ['id', 'title', 'task_status_id']:
+            if sort_order.lower() == "desc":
+                query = query.order_by(getattr(Task, sort_fields).desc())
+            else:
+                query = query.order_by(getattr(Task, sort_fields))
+        else:
+            raise BadRequest(f"{sort_fields} недопустимое поле для сортировки")
+
+    if limit is not None and limit <= MAX_AMOUNT_OF_TASKS:
+        query = query.limit(limit)
+    else:
+        query = query.limit(MAX_AMOUNT_OF_TASKS)
+    if offset is not None:
+        query = query.offset(offset)
+
+    return query.all()
