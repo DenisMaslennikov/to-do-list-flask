@@ -11,10 +11,10 @@ def get_task_list_for_user(
     sort_order: str | None = None,
     limit: int | None = None,
     offset: int | None = None,
-) -> list[Task]:
+) -> dict[str, list[Task] | int]:
     """Получение списка задач для конкретного пользователя."""
     with session_scope() as session:
-        return get_task_list_for_user_repo(
+        results, count = get_task_list_for_user_repo(
             session,
             user_id,
             title,
@@ -24,3 +24,4 @@ def get_task_list_for_user(
             limit,
             offset,
         )
+        return {"results": results, "count": count}

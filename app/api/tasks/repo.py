@@ -14,7 +14,7 @@ def get_task_list_for_user_repo(
     sort_order: str | None = None,
     limit: int | None = None,
     offset: int | None = None,
-) -> list[Task]:
+) -> tuple[list[Task], int]:
     """Получение списка задач из базы."""
 
     query = session.query(Task).filter(Task.user_id == user_id)
@@ -25,13 +25,15 @@ def get_task_list_for_user_repo(
         query = query.filter(Task.task_status_id == task_status_id)
 
     if sort_fields is not None:
-        if hasattr(Task, sort_fields) and sort_fields in ['id', 'title', 'task_status_id']:
+        if hasattr(Task, sort_fields) and sort_fields in ["id", "title", "task_status_id"]:
             if sort_order.lower() == "desc":
                 query = query.order_by(getattr(Task, sort_fields).desc())
             else:
                 query = query.order_by(getattr(Task, sort_fields))
         else:
             raise BadRequest(f"{sort_fields} недопустимое поле для сортировки")
+
+    count = query.count()
 
     if limit is not None and limit <= MAX_AMOUNT_OF_TASKS:
         query = query.limit(limit)
@@ -40,4 +42,4 @@ def get_task_list_for_user_repo(
     if offset is not None:
         query = query.offset(offset)
 
-    return query.all()
+    return query.all(), count
