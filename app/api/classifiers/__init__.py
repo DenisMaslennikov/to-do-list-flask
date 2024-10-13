@@ -1,1 +1,1 @@
-from .views import ns
+from .views import ns as ns

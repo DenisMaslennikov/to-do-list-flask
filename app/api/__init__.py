@@ -1,8 +1,8 @@
 from flask_restx import Api
 
+from app.api.classifiers import ns as classifiers_ns
 from app.api.tasks import ns as tasks_ns
 from app.api.users import ns as users_ns
-from app.api.classifiers import ns as classifiers_ns
 
 authorizations = {
     "jwt": {

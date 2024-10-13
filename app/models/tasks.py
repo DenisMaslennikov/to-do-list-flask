@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -31,6 +32,8 @@ class Task(Base):
         comment="Идентификатор пользователя",
         index=True,
     )
+    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
+    due_date: Mapped[datetime | None] = mapped_column()
 
     user: Mapped["User"] = relationship(back_populates="tasks")
     task_status: Mapped["TaskStatus"] = relationship(back_populates="tasks")
