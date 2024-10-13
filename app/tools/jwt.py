@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from uuid import UUID
 
 import jwt
 from flask import current_app, request
@@ -38,7 +39,7 @@ def token_required(function):
                 current_app.config["JWT_ACCESS_SECRET_KEY"],
                 algorithms=current_app.config["JWT_ALGORITHM"],
             )
-            current_user_id = data["user_id"]
+            current_user_id = UUID(data["user_id"])
         except jwt.ExpiredSignatureError:
             return {"message": "Token is expired"}, 401
         except jwt.InvalidTokenError:

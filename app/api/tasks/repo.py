@@ -10,7 +10,7 @@ from constants import MAX_AMOUNT_OF_TASKS
 
 def get_task_list_for_user_repo(
     session: Session,
-    user_id: str,
+    user_id: UUID,
     title: str | None = None,
     task_status_id: int | None = None,
     sort_fields: str | None = None,
@@ -53,7 +53,7 @@ def get_task_list_for_user_repo(
 
 def create_task_repo(
     session: Session,
-    user_id: str,
+    user_id: UUID,
     title: str,
     description: str,
     task_status_id: int,

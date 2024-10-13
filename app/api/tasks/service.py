@@ -9,7 +9,7 @@ from app.tools.session import session_scope
 
 
 def get_task_list_for_user(
-    user_id: str,
+    user_id: UUID,
     title: str | None = None,
     task_status_id: int | None = None,
     sort_fields: str | None = None,
@@ -33,7 +33,7 @@ def get_task_list_for_user(
         return {"results": results, "count": count}
 
 
-def create_task(user_id: str, title: str, description: str, task_status_id: int, due_date: datetime) -> Task:
+def create_task(user_id: UUID, title: str, description: str, task_status_id: int, due_date: datetime) -> Task:
     """Создаёт задачу для пользователя."""
     with session_scope() as session:
         task = create_task_repo(
@@ -49,10 +49,10 @@ def create_task(user_id: str, title: str, description: str, task_status_id: int,
         return task
 
 
-def get_task_by_id(user_id: str, task_id: UUID) -> Task:
+def get_task_by_id(user_id: UUID, task_id: UUID) -> Task:
     """Получение задачи по id."""
     with session_scope() as session:
         task = get_task_by_id_repo(session, task_id=task_id, load_related=True)
-        if task.user_id != UUID(user_id):
+        if task.user_id != user_id:
             raise Forbidden("Вы можете просматривать только свои задачи")
         return task
