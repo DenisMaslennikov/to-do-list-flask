@@ -77,3 +77,22 @@ def get_task_by_id_repo(session: Session, task_id: str | UUID, load_related: boo
     if load_related:
         query = query.options(joinedload(Task.task_status))
     return query.first()
+
+
+def update_task_repo(
+    session: Session,
+    task: Task,
+    title: str,
+    description: str,
+    task_status_id: int,
+    complete_before: datetime,
+    completed_at: datetime | None = None,
+) -> Task:
+    """Обновление задачи в базе данных."""
+    task.task_status_id = task_status_id
+    task.title = title
+    task.description = description
+    task.complete_before = complete_before
+    task.complete_at = completed_at
+    session.flush()
+    return task
