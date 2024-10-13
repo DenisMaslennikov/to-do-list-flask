@@ -1,14 +1,14 @@
 from flask_restx import Model, fields
 from flask_restx.reqparse import Argument, RequestParser
 
-from app.api.classifiers.schemas import task_status
+from app.api.classifiers.schemas import task_status_read_schema
 
 task_list_schema = Model(
     "TaskListSchema",
     {
         "id": fields.String(description="Идентификатор задачи"),
         "title": fields.String(description="Заголовок задачи"),
-        "task_status": fields.Nested(task_status, description="Статус задачи"),
+        "task_status": fields.Nested(task_status_read_schema, description="Статус задачи"),
     },
 )
 
@@ -50,6 +50,6 @@ task_read_schema = Model(
         "id": fields.String(description="Идентификатор задачи"),
         "title": fields.String(description="Заголовок задачи"),
         "description": fields.String(description="Описание задачи"),
-        "task_status": fields.Nested(task_status, description="Статус задачи"),
+        "task_status": fields.Nested(task_status_read_schema, description="Статус задачи"),
     },
 )
