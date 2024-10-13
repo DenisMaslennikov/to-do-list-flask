@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from functools import partial
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -36,7 +37,7 @@ class Task(Base):
     updated_at: Mapped[datetime | None] = mapped_column(
         server_onupdate=func.now(),
         comment="Обновлена",
-        onupdate=datetime.now(tz=timezone.utc),
+        onupdate=partial(datetime.now, tz=timezone.utc),
     )
     complete_before: Mapped[datetime | None] = mapped_column(comment="Выполнить до")
     completed_at: Mapped[datetime | None] = mapped_column(comment="Выполнена")
