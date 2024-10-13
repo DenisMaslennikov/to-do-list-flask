@@ -93,6 +93,6 @@ def update_task_repo(
     task.title = title
     task.description = description
     task.complete_before = complete_before
-    task.complete_at = completed_at
+    task.completed_at = completed_at
     session.flush()
     return task
