@@ -1,6 +1,9 @@
 from datetime import datetime
+from uuid import UUID
 
-from app.api.tasks.repo import create_task_repo, get_task_list_for_user_repo, get_task_repo
+from werkzeug.exceptions import Forbidden
+
+from app.api.tasks.repo import create_task_repo, get_task_list_for_user_repo, get_task_by_id_repo
 from app.models import Task
 from app.tools.session import session_scope
 
@@ -42,5 +45,14 @@ def create_task(user_id: str, title: str, description: str, task_status_id: int,
             due_date=due_date,
         )
         session.flush()
-        task = get_task_repo(session, task_id=task.id, load_related=True)
+        task = get_task_by_id_repo(session, task_id=task.id, load_related=True)
+        return task
+
+
+def get_task_by_id(user_id: str, task_id: UUID) -> Task:
+    """Получение задачи по id."""
+    with session_scope() as session:
+        task = get_task_by_id_repo(session, task_id=task_id, load_related=True)
+        if task.user_id != UUID(user_id):
+            raise Forbidden("Вы можете просматривать только свои задачи")
         return task

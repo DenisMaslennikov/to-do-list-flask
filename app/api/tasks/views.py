@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from uuid import UUID
 
 from flask_restx import Namespace, Resource
 
@@ -34,6 +35,26 @@ class TaskListResource(Resource):
         """Получение списка задач пользователя."""
         kwargs = task_filter_parser.parse_args()
         return get_task_list_for_user(user_id=current_user_id, **kwargs)
+
+    @ns.expect(task_write_schema)
+    @ns.marshal_with(task_read_schema, code=HTTPStatus.CREATED)
+    @ns.doc(security="jwt")
+    def post(self, current_user_id: str) -> tuple[Task, int]:
+        """Создание новой задачи."""
+        return create_task(user_id=current_user_id, **ns.payload), HTTPStatus.CREATED
+
+
+@ns.route("<uuid:task_id>")
+class TaskResource(Resource):
+    """Работа с конкретной задачей, получение, обновление, удаление."""
+
+    method_decorators = [token_required]
+
+    @ns.marshal_with(task_read_schema)
+    @ns.doc(security="jwt")
+    def get(self, current_user_id: str, task_id: UUID) -> Task:
+        """Получение задачи по id."""
+        return get_task_by_id(user_id=current_user_id, task_id=task_id)
 
     @ns.expect(task_write_schema)
     @ns.marshal_with(task_read_schema, code=HTTPStatus.CREATED)
