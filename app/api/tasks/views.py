@@ -10,7 +10,7 @@ from app.api.tasks.schemas import (
     task_read_schema,
     task_write_schema,
 )
-from app.api.tasks.service import create_task, get_task_by_id, get_task_list_for_user, update_task
+from app.api.tasks.service import create_task, get_task, get_task_list_for_user, update_task, delete_task
 from app.models import Task
 from app.tools.jwt import token_required
 
@@ -54,7 +54,7 @@ class TaskResource(Resource):
     @ns.doc(security="jwt")
     def get(self, current_user_id: UUID, task_id: UUID) -> Task:
         """Получение задачи по id."""
-        return get_task_by_id(user_id=current_user_id, task_id=task_id)
+        return get_task(user_id=current_user_id, task_id=task_id)
 
     @ns.expect(task_write_schema)
     @ns.marshal_with(task_read_schema)
@@ -62,3 +62,7 @@ class TaskResource(Resource):
     def put(self, current_user_id: UUID, task_id: UUID) -> Task:
         """Полное обновление задачи."""
         return update_task(user_id=current_user_id, task_id=task_id, **ns.payload)
+
+    def delete(self, current_user_id: UUID, task_id: UUID) -> None:
+        """Удаление задачи по id."""
+        delete_task(user_id=current_user_id, task_id=task_id)

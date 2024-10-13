@@ -71,7 +71,7 @@ def create_task_repo(
     return task
 
 
-def get_task_by_id_repo(session: Session, task_id: str | UUID, load_related: bool = False) -> Task | None:
+def get_task_repo(session: Session, task_id: str | UUID, load_related: bool = False) -> Task | None:
     """Получение задачи по id."""
     query = session.query(Task).filter(Task.id == task_id)
     if load_related:
@@ -96,3 +96,8 @@ def update_task_repo(
     task.completed_at = completed_at
     session.flush()
     return task
+
+
+def delete_task_repo(session: Session, task: Task) -> None:
+    """Удаление задачи из базы данных."""
+    session.delete(task)

@@ -3,7 +3,8 @@ from uuid import UUID
 
 from werkzeug.exceptions import BadRequest, Forbidden
 
-from app.api.tasks.repo import create_task_repo, get_task_by_id_repo, get_task_list_for_user_repo, update_task_repo
+from app.api.tasks.repo import create_task_repo, get_task_repo, get_task_list_for_user_repo, update_task_repo, \
+    delete_task_repo
 from app.models import Task
 from app.tools.session import session_scope
 
@@ -45,14 +46,14 @@ def create_task(user_id: UUID, title: str, description: str, task_status_id: int
             complete_before=complete_before,
         )
         session.flush()
-        task = get_task_by_id_repo(session, task_id=task.id, load_related=True)
+        task = get_task_repo(session, task_id=task.id, load_related=True)
         return task
 
 
-def get_task_by_id(user_id: UUID, task_id: UUID) -> Task:
+def get_task(user_id: UUID, task_id: UUID) -> Task:
     """Получение задачи по id."""
     with session_scope() as session:
-        task = get_task_by_id_repo(session, task_id=task_id, load_related=True)
+        task = get_task_repo(session, task_id=task_id, load_related=True)
         if task is None:
             raise BadRequest("Задача не найдена")
         if task.user_id != user_id:
@@ -71,7 +72,7 @@ def update_task(
 ) -> Task:
     """Полное обновление задачи."""
     with session_scope() as session:
-        task = get_task_by_id_repo(session, task_id=task_id, load_related=True)
+        task = get_task_repo(session, task_id=task_id, load_related=True)
         if task is None:
             raise BadRequest("Задача не найдена")
         if task.user_id != user_id:
@@ -87,3 +88,14 @@ def update_task(
         )
         session.refresh(task)
         return task
+
+
+def delete_task(user_id: UUID, task_id: UUID):
+    """Удаление задачи по id."""
+    with session_scope() as session:
+        task = get_task_repo(session, task_id=task_id)
+        if task is None:
+            raise BadRequest('Задача не найдена')
+        if task.user_id != user_id:
+            raise Forbidden('Вы можете удалять только свои задачи')
+        delete_task_repo(session, task)
