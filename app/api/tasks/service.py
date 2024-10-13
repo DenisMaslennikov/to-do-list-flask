@@ -5,10 +5,10 @@ from werkzeug.exceptions import BadRequest, Forbidden
 
 from app.api.tasks.repo import (
     create_task_repo,
-    get_task_repo,
-    get_task_list_for_user_repo,
-    update_task_repo,
     delete_task_repo,
+    get_task_list_for_user_repo,
+    get_task_repo,
+    update_task_repo,
 )
 from app.models import Task
 from app.tools.session import session_scope

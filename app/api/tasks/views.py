@@ -10,7 +10,7 @@ from app.api.tasks.schemas import (
     task_read_schema,
     task_write_schema,
 )
-from app.api.tasks.service import create_task, get_task, get_task_list_for_user, update_task, delete_task
+from app.api.tasks.service import create_task, delete_task, get_task, get_task_list_for_user, update_task
 from app.models import Task
 from app.tools.jwt import token_required
 
