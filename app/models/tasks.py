@@ -33,7 +33,11 @@ class Task(Base):
         index=True,
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), comment="Создана")
-    updated_at: Mapped[datetime | None] = mapped_column(server_onupdate=func.now(), comment="Обновлена")
+    updated_at: Mapped[datetime | None] = mapped_column(
+        server_onupdate=func.now(),
+        comment="Обновлена",
+        onupdate=func.now(),
+    )
     complete_before: Mapped[datetime | None] = mapped_column(comment="Выполнить до")
     completed_at: Mapped[datetime | None] = mapped_column(comment="Выполнена")
 
