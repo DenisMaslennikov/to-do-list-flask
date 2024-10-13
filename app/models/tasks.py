@@ -33,7 +33,7 @@ class Task(Base):
     )
 
     user: Mapped["User"] = relationship(back_populates="tasks")
-    status: Mapped["TaskStatus"] = relationship(back_populates="tasks")
+    task_status: Mapped["TaskStatus"] = relationship(back_populates="tasks")
 
     @validates("title")
     def validate_title(self, key: str, title: str) -> str:

@@ -1,12 +1,14 @@
 from flask_restx import Model, fields
 from flask_restx.reqparse import Argument, RequestParser
 
+from app.api.classifiers.schemas import task_status
+
 task_list_schema = Model(
     "TaskListSchema",
     {
         "id": fields.String(description="Идентификатор задачи"),
         "title": fields.String(description="Заголовок задачи"),
-        "task_status": fields.String(description="Статус задачи"),
+        "task_status": fields.Nested(task_status, description="Статус задачи"),
     },
 )
 
@@ -36,9 +38,18 @@ task_filter_parser.add_argument(Argument(name="offset", type=int, help="Смещ
 task_write_schema = Model(
     "TaskWriteSchema",
     {
+        "title": fields.String(description="Заголовок задачи"),
+        "description": fields.String(description="Описание задачи"),
+        "task_status_id": fields.Integer(description="Статус задачи"),
+    },
+)
+
+task_read_schema = Model(
+    "TaskReadSchema",
+    {
         "id": fields.String(description="Идентификатор задачи"),
         "title": fields.String(description="Заголовок задачи"),
         "description": fields.String(description="Описание задачи"),
-        "task_status": fields.String(description="Статус задачи"),
+        "task_status": fields.Nested(task_status, description="Статус задачи"),
     },
 )
