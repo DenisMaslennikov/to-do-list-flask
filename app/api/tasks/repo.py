@@ -19,7 +19,6 @@ def get_task_list_for_user_repo(
     load_related: bool = False,
 ) -> tuple[list[Task], int]:
     """Получение списка задач из базы."""
-
     query = session.query(Task).filter(Task.user_id == user_id)
 
     if title is not None:

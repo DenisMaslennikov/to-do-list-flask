@@ -3,13 +3,13 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource
 
 from app.api.tasks.schemas import (
+    paginated_task_list_schema,
     task_filter_parser,
     task_list_schema,
-    paginated_task_list_schema,
-    task_write_schema,
     task_read_schema,
+    task_write_schema,
 )
-from app.api.tasks.service import get_task_list_for_user, create_task
+from app.api.tasks.service import create_task, get_task_list_for_user
 from app.models import Task
 from app.tools.jwt import token_required
 
@@ -38,6 +38,6 @@ class TaskListResource(Resource):
     @ns.expect(task_write_schema)
     @ns.marshal_with(task_read_schema, code=HTTPStatus.CREATED)
     @ns.doc(security="jwt")
-    def post(self, current_user_id: str) -> Task:
+    def post(self, current_user_id: str) -> tuple[Task, int]:
         """Создание новой задачи."""
-        return create_task(user_id=current_user_id, **ns.payload)
+        return create_task(user_id=current_user_id, **ns.payload), HTTPStatus.CREATED

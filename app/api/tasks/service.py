@@ -1,4 +1,4 @@
-from app.api.tasks.repo import get_task_list_for_user_repo, create_task_repo, get_task_repo
+from app.api.tasks.repo import create_task_repo, get_task_list_for_user_repo, get_task_repo
 from app.models import Task
 from app.tools.session import session_scope
 
