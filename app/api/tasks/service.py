@@ -33,7 +33,7 @@ def get_task_list_for_user(
         return {"results": results, "count": count}
 
 
-def create_task(user_id: UUID, title: str, description: str, task_status_id: int, due_date: datetime) -> Task:
+def create_task(user_id: UUID, title: str, description: str, task_status_id: int, complete_before: datetime) -> Task:
     """Создаёт задачу для пользователя."""
     with session_scope() as session:
         task = create_task_repo(
@@ -42,7 +42,7 @@ def create_task(user_id: UUID, title: str, description: str, task_status_id: int
             title=title,
             description=description,
             task_status_id=task_status_id,
-            due_date=due_date,
+            complete_before=complete_before,
         )
         session.flush()
         task = get_task_by_id_repo(session, task_id=task.id, load_related=True)
@@ -56,3 +56,7 @@ def get_task_by_id(user_id: UUID, task_id: UUID) -> Task:
         if task.user_id != user_id:
             raise Forbidden("Вы можете просматривать только свои задачи")
         return task
+
+
+def update_task(user_id: UUID, task_id: UUID) -> Task:
+    """Полное обновление задачи."""

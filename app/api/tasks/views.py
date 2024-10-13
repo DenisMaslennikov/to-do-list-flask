@@ -61,4 +61,4 @@ class TaskResource(Resource):
     @ns.doc(security="jwt")
     def put(self, current_user_id: UUID, task_id: UUID) -> Task:
         """Полное обновление задачи."""
-        return uodate_task(user_id=current_user_id, task_id=task_id, **ns.payload)
+        return update_task(user_id=current_user_id, task_id=task_id, **ns.payload)

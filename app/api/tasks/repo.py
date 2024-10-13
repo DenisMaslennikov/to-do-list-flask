@@ -57,10 +57,16 @@ def create_task_repo(
     title: str,
     description: str,
     task_status_id: int,
-    due_date: datetime,
+    complete_before: datetime,
 ) -> Task:
     """Создает задачу для пользователя в базе."""
-    task = Task(user_id=user_id, title=title, description=description, task_status_id=task_status_id, due_date=due_date)
+    task = Task(
+        user_id=user_id,
+        title=title,
+        description=description,
+        task_status_id=task_status_id,
+        complete_before=complete_before,
+    )
     session.add(task)
     return task
 
