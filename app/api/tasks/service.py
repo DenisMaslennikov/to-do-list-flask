@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from app.api.tasks.repo import create_task_repo, get_task_list_for_user_repo, get_task_repo
 from app.models import Task
 from app.tools.session import session_scope
@@ -28,7 +30,7 @@ def get_task_list_for_user(
         return {"results": results, "count": count}
 
 
-def create_task(user_id: str, title: str, description: str, task_status_id: int) -> Task:
+def create_task(user_id: str, title: str, description: str, task_status_id: int, due_date: datetime) -> Task:
     """Создаёт задачу для пользователя."""
     with session_scope() as session:
         task = create_task_repo(
@@ -37,6 +39,7 @@ def create_task(user_id: str, title: str, description: str, task_status_id: int)
             title=title,
             description=description,
             task_status_id=task_status_id,
+            due_date=due_date,
         )
         session.flush()
         task = get_task_repo(session, task_id=task.id, load_related=True)

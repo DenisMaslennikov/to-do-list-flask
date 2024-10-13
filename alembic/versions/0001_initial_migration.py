@@ -2,7 +2,7 @@
 
 Revision ID: 0001
 Revises: 
-Create Date: 2024-10-13 12:55:23.443343
+Create Date: 2024-10-13 13:18:49.778372
 
 """
 from typing import Sequence, Union
@@ -45,8 +45,10 @@ def upgrade() -> None:
     sa.Column('description', sa.String(), nullable=False, comment='Описание задачи'),
     sa.Column('task_status_id', sa.Integer(), nullable=False, comment='Идентификатор статуса'),
     sa.Column('user_id', sa.Uuid(), nullable=False, comment='Идентификатор пользователя'),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('due_date', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False, comment='Создана'),
+    sa.Column('updated_at', sa.DateTime(), nullable=True, comment='Обновлена'),
+    sa.Column('complete_before', sa.DateTime(), nullable=True, comment='Выполнить до'),
+    sa.Column('completed_at', sa.DateTime(), nullable=True, comment='Выполнена'),
     sa.ForeignKeyConstraint(['task_status_id'], ['cl_task_status.id'], ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),

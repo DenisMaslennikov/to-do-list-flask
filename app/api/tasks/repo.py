@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy.orm import Session, joinedload
@@ -50,14 +51,16 @@ def get_task_list_for_user_repo(
     return query.all(), count
 
 
-def create_task_repo(session: Session, user_id: str, title: str, description: str, task_status_id: int) -> Task:
+def create_task_repo(
+    session: Session,
+    user_id: str,
+    title: str,
+    description: str,
+    task_status_id: int,
+    due_date: datetime,
+) -> Task:
     """Создает задачу для пользователя в базе."""
-    task = Task(
-        user_id=user_id,
-        title=title,
-        description=description,
-        task_status_id=task_status_id,
-    )
+    task = Task(user_id=user_id, title=title, description=description, task_status_id=task_status_id, due_date=due_date)
     session.add(task)
     return task
 

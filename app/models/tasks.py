@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String, text
+from sqlalchemy import ForeignKey, String, text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from app.models.base import Base
@@ -32,8 +32,10 @@ class Task(Base):
         comment="Идентификатор пользователя",
         index=True,
     )
-    created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
-    due_date: Mapped[datetime | None] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), comment="Создана")
+    updated_at: Mapped[datetime | None] = mapped_column(server_onupdate=func.now(), comment="Обновлена")
+    complete_before: Mapped[datetime | None] = mapped_column(comment="Выполнить до")
+    completed_at: Mapped[datetime | None] = mapped_column(comment="Выполнена")
 
     user: Mapped["User"] = relationship(back_populates="tasks")
     task_status: Mapped["TaskStatus"] = relationship(back_populates="tasks")

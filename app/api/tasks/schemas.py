@@ -9,6 +9,9 @@ task_list_schema = Model(
         "id": fields.String(description="Идентификатор задачи"),
         "title": fields.String(description="Заголовок задачи"),
         "task_status": fields.Nested(task_status_read_schema, description="Статус задачи"),
+        "created_at": fields.DateTime(description="Создана"),
+        "updated_at": fields.DateTime(description="Обновлена"),
+        "due_date": fields.DateTime(description="Выполнить до"),
     },
 )
 
@@ -41,6 +44,7 @@ task_write_schema = Model(
         "title": fields.String(description="Заголовок задачи"),
         "description": fields.String(description="Описание задачи"),
         "task_status_id": fields.Integer(description="Статус задачи"),
+        "due_date": fields.DateTime(description="Выполнить до"),
     },
 )
 
@@ -51,5 +55,8 @@ task_read_schema = Model(
         "title": fields.String(description="Заголовок задачи"),
         "description": fields.String(description="Описание задачи"),
         "task_status": fields.Nested(task_status_read_schema, description="Статус задачи"),
+        "created_at": fields.DateTime(description="Создана"),
+        "updated_at": fields.DateTime(description="Обновлена"),
+        "due_date": fields.DateTime(description="Выполнить до"),
     },
 )
