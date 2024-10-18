@@ -9,6 +9,7 @@ from alembic import command
 from alembic.config import Config as AlembicConfig
 from app import get_app
 from app.models import User
+from app.tools.jwt import generate_token
 from config import TestingConfig
 from tests.functions import wait_for_port
 
@@ -162,3 +163,10 @@ def simple_user(db_session, faker, user_password) -> User:
     db_session.add(user)
     db_session.commit()
     return user
+
+
+@pytest.fixture
+def refresh_jwt_token(simple_user, app):
+    return generate_token(
+        str(simple_user.id), app.config["JWT_REFRESH_SECRET_KEY"], app.config["JWT_REFRESH_EXPIRATION_DELTA"]
+    )
