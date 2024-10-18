@@ -170,3 +170,10 @@ def refresh_jwt_token(simple_user, app):
     return generate_token(
         str(simple_user.id), app.config["JWT_REFRESH_SECRET_KEY"], app.config["JWT_REFRESH_EXPIRATION_DELTA"]
     )
+
+
+@pytest.fixture
+def access_jwt_token(simple_user, app):
+    return generate_token(
+        str(simple_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
+    )
