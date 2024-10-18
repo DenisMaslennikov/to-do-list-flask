@@ -18,10 +18,10 @@ RUN apt-get update && apt-get upgrade -y \
   && curl -sSL 'https://install.python-poetry.org' | python - \
   && poetry --version
 
-WORKDIR /code
+WORKDIR /src
 
 # Копировать только requirements, чтобы кэшировать их в слое docker
-COPY ./poetry.lock ./pyproject.toml /code/
+COPY ./poetry.lock ./pyproject.toml /src/
 
 RUN --mount=type=cache,target="$POETRY_CACHE_DIR" \
   poetry version \
