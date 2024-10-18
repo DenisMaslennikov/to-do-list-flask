@@ -5,12 +5,11 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from alembic.script import ScriptDirectory
 from app.models import Base
-from config import DevelopmentConfig
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option('sqlalchemy.url', DevelopmentConfig.DATABASE_URI)
+# config.set_main_option('sqlalchemy.url', DevelopmentConfig.DATABASE_URI)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -41,10 +40,10 @@ def process_revision_directives(context, revision, directives):
         new_rev_id = 1
     else:
         # default branch with incrementation
-        last_rev_id = int(head_revision.lstrip('0'))
+        last_rev_id = int(head_revision.lstrip("0"))
         new_rev_id = last_rev_id + 1
     # fill zeros up to 4 digits: 1 -> 0001
-    migration_script.rev_id = '{0:04}'.format(new_rev_id)
+    migration_script.rev_id = "{0:04}".format(new_rev_id)
 
 
 def run_migrations_offline() -> None:
@@ -59,12 +58,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option('sqlalchemy.url')
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={'paramstyle': 'named'},
+        dialect_opts={"paramstyle": "named"},
         process_revision_directives=process_revision_directives,
     )
 
@@ -79,11 +78,13 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool,
-    )
+    connectable = context.config.attributes.get("connection", None)
+    if connectable is None:
+        connectable = engine_from_config(
+            context.config.get_section(context.config.config_ini_section),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
 
     with connectable.connect() as connection:
         context.configure(

@@ -39,3 +39,10 @@ class DevelopmentConfig(BaseConfig):
 
     LOG_LEVEL = "DEBUG"
     JWT_ACCESS_EXPIRATION_DELTA = timedelta(days=1)
+
+
+class TestingConfig(BaseConfig):
+    """Конфигурация для тестов."""
+
+    DATABASE_HOST_ALEMBIC_TESTS = "db2test"
+    DATABASE_HOST_TESTS = "db1test"

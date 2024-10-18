@@ -1,7 +1,11 @@
 version: "3.8"
 
 services:
-  dbtest:
+  db1test:
+    image: postgres:latest
+    env_file: ./config/.env
+
+  db2test:
     image: postgres:latest
     env_file: ./config/.env
 
@@ -13,6 +17,7 @@ services:
     volumes:
       - ".:/code/"
     depends_on:
-      - dbtest
+      - db1test
+      - db2test
     entrypoint: []
     restart: always

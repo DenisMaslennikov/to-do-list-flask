@@ -23,6 +23,7 @@ pytest = "^8.3.3"
 faker = "^30.6.0"
 pytest-cov = "^5.0.0"
 pytest-alembic = "^0.11.1"
+sqlalchemy-utils = "^0.41.2"
 
 [build-system]
 requires = ["poetry-core"]
@@ -128,6 +129,7 @@ exclude = [
   "venv",
   "migrations",
   "alembic/*",
+  "test_migrations.py"
 ]
 per-file-ignores = { }
 
@@ -136,7 +138,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.format]
 # Как и в Black, используйте двойные кавычки для строк.
-quote-style = "single"
+quote-style = "double"
 
 # Как и в случае с Black, делайте отступы с помощью пробелов, а не табуляции.
 indent-style = "space"
@@ -187,3 +189,11 @@ multiline-quotes = "single"
 [tool.black]
 line-length = 120
 target-version = ["py312"]
+
+[tool.pytest.ini_options]
+addopts = "-vvv"
+python_files = "test_*.py"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::SyntaxWarning",
+]
