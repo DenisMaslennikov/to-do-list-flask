@@ -44,5 +44,5 @@ class DevelopmentConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """Конфигурация для тестов."""
 
-    DATABASE_HOST_ALEMBIC_TESTS = "db2test"
+    DATABASE_HOST_MIGRATIONS_TESTS = "db2test"
     DATABASE_HOST_TESTS = "db1test"
