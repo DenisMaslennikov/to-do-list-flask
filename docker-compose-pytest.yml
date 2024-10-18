@@ -15,7 +15,7 @@ services:
       dockerfile: docker/api/Dockerfile
     env_file: ./config/.env
     volumes:
-      - ".:/code/"
+      - ".:/src/"
     depends_on:
       - db1test
       - db2test

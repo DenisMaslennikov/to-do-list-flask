@@ -1,11 +1,14 @@
 import pytest
+from faker import Faker
+from flask.testing import FlaskClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from app import get_app
+from app.models import User
 from config import TestingConfig
 from tests.functions import wait_for_port
 
@@ -98,17 +101,64 @@ def engine(app, migrations):
     engine.dispose()
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function")
 def db_session(engine):
     """Создает и возвращает сессию базы данных для тестирования."""
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    savepoint = session.begin_nested()
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection, join_transaction_mode="create_savepoint")
     try:
         yield session
-    except Exception:  # Откат транзакции при ошибке
+        session.commit()
+    except Exception:
         session.rollback()
         raise
     finally:
-        savepoint.rollback()
         session.close()
+        transaction.rollback()
+        connection.close()
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_session(mocker, db_session):
+    """Патчит сессию подменяя её фикстурой."""
+    mocker.patch("app.api.users.service.session_scope", return_value=db_session)
+    mocker.patch("app.api.tasks.service.session_scope", return_value=db_session)
+    mocker.patch("app.api.classifiers.service.session_scope", return_value=db_session)
+
+
+@pytest.fixture
+def faker() -> Faker:
+    """Фейкер для генерации данных."""
+    return Faker("ru_RU")
+
+
+@pytest.fixture
+def client(app) -> FlaskClient:
+    """Клиент для тестирования апи."""
+    with app.app_context():
+        with app.test_client() as client:
+            yield client
+
+
+@pytest.fixture
+def user_password(faker) -> str:
+    """Генерирует пароль пользователя."""
+    return faker.password()
+
+
+@pytest.fixture
+def simple_user(db_session, faker, user_password) -> User:
+    """Обычный пользователь."""
+    email = faker.email()
+    user = User(
+        email=email,
+        first_name=faker.first_name(),
+        second_name=faker.last_name(),
+        middle_name=faker.middle_name(),
+        username=faker.user_name(),
+    )
+    user.password = user_password
+    db_session.add(user)
+    db_session.commit()
+    return user

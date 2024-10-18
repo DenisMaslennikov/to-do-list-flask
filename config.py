@@ -26,12 +26,13 @@ class BaseConfig(object):
     PROPAGATE_EXCEPTIONS = True
     JWT_ALGORITHM = "HS256"
     JWT_REFRESH_EXPIRATION_DELTA = timedelta(days=7)
+    JWT_ACCESS_EXPIRATION_DELTA = timedelta(minutes=5)
 
 
 class ProductionConfig(BaseConfig):
     """Продакшен конфигурация."""
 
-    JWT_ACCESS_EXPIRATION_DELTA = timedelta(minutes=5)
+    pass
 
 
 class DevelopmentConfig(BaseConfig):
