@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 import pytest
+from coverage import data
 from pytest_lazy_fixtures import lf
 
 from app.models import Task
@@ -75,3 +76,21 @@ def test_delete_task(client, db_session, jwt_token, expected_status_code, user_t
         assert db_session.query(Task).count() == 0, "Количество задач в базе данных не соответствует ожидаемому"
     else:
         assert db_session.query(Task).count() == 1, "Количество задач в базе данных не соответствует ожидаемому"
+
+
+@pytest.mark.parametrize(
+    ("jwt_token", "expected_status_code"),
+    [
+        (lf("access_jwt_token_simple_user"), HTTPStatus.OK),
+        (lf("access_jwt_token_another_user"), HTTPStatus.FORBIDDEN),
+    ],
+)
+def test_get_task(client, db_session, jwt_token, expected_status_code, user_task):
+    """Тест обновление задачи."""
+    headers = {"Authorization": f"Bearer {jwt_token}"}
+    response = client.get(f"/api/v1/tasks/{user_task.id}", headers=headers)
+    print(response.json)
+    assert response.status_code == expected_status_code, "Полученный статус код отличается от ожидаемого"
+
+    if expected_status_code == HTTPStatus.OK:
+        check_task(user_task, response.json)
