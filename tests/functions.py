@@ -95,6 +95,6 @@ def check_task(task_from_db: Task, data: dict[str, str | datetime.datetime]) -> 
             data["created_at"] = datetime.datetime.fromisoformat(data["created_at"])
         assert task_from_db.created_at == data["created_at"], "Дата создания не совпадает"
     if "updated_at" in data:
-        if isinstance(data["created_at"], str):
+        if isinstance(data["updated_at"], str):
             data["updated_at"] = datetime.datetime.fromisoformat(data["updated_at"])
         assert task_from_db.updated_at == data["updated_at"], "Дата обновления не совпадает"
