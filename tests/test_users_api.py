@@ -91,5 +91,17 @@ def test_delete_user_me(client, access_jwt_token, db_session):
         print(response.json)
 
     assert response.status_code == HTTPStatus.NO_CONTENT, "Код ответа отличается от ожидаемого"
-
     assert db_session.query(User).count() == 0, "Количество пользователей в бд не соответствует ожидаемому"
+
+
+def test_get_user_me(client, access_jwt_token, simple_user):
+    """Проверяет получение информации о текущем пользователе."""
+    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+    response = client.get("/api/v1/users/me/", headers=headers)
+    print(response.json)
+    assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
+    assert simple_user.email == response.json["email"], "Email не соответствует"
+    assert simple_user.username == response.json["username"], "Username не соответствует"
+    assert simple_user.first_name == response.json["first_name"], "Имя не соответствует"
+    assert simple_user.second_name == response.json["second_name"], "Фамилия не соответствует"
+    assert simple_user.middle_name == response.json["middle_name"], "Отчество не соответствует"
