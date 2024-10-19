@@ -23,7 +23,7 @@ jobs:
       # Создание .env файла
       - name: Create .env file
         run: |
-          echo "FLASK_DEBUG=True
+          echo "FLASK_DEBUG=True" >> /config/.env
           echo "FLASK_SECRET_KEY='FLASK_SECRET_KEY'" >> /config/.env
           echo "JWT_ACCESS_SECRET_KEY='JWT_ACCESS_SECRET_KEY'" >> /config/.env
           echo "JWT_REFRESH_SECRET_KEY='JWT_REFRESH_SECRET_KEY'" >> /config/.env
