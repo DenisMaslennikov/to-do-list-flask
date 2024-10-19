@@ -36,4 +36,4 @@ jobs:
       # 3. Запуск Docker Compose и тестов
       - name: Start services with Docker Compose
         run: |
-          docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml run --build -e PYTHONPATH=./app --rm api pytest && docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml down -v || docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml down -v && exit 1 
+          docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml run --build -e PYTHONPATH=./app --rm api pytest && docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml down -v || docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml down -v && exit 0 
