@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from werkzeug.exceptions import BadRequest
 
 from app.models import Task
-from constants import MAX_AMOUNT_OF_TASKS
+from constants import MAX_AMOUNT_OF_TASKS_TO_DISPLAY
 
 
 def get_task_list_for_user_repo(
@@ -41,10 +41,10 @@ def get_task_list_for_user_repo(
 
     count = query.count()
 
-    if limit is not None and limit <= MAX_AMOUNT_OF_TASKS:
+    if limit is not None and limit <= MAX_AMOUNT_OF_TASKS_TO_DISPLAY:
         query = query.limit(limit)
     else:
-        query = query.limit(MAX_AMOUNT_OF_TASKS)
+        query = query.limit(MAX_AMOUNT_OF_TASKS_TO_DISPLAY)
     if offset is not None:
         query = query.offset(offset)
 

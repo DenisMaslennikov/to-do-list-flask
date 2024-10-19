@@ -1,6 +1,10 @@
 import re
 
+# Регулярное выражение для проверки валидности email
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+
+# Регулярное выражение для проверки имени пользователя
 USERNAME_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+$")
 
-MAX_AMOUNT_OF_TASKS = 1000
+# Максимально возможное количество задач для запроса на получение списка задач
+MAX_AMOUNT_OF_TASKS_TO_DISPLAY = 1000
