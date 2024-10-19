@@ -53,4 +53,25 @@ def test_update_task(client, db_session, jwt_token, expected_status_code, user_t
     assert response.status_code == expected_status_code, "Полученный статус код отличается от ожидаемого"
 
     db_session.refresh(user_task)
-    check_task(user_task, data)
+    if expected_status_code == HTTPStatus.OK:
+        check_task(user_task, data)
+
+
+@pytest.mark.parametrize(
+    ("jwt_token", "expected_status_code"),
+    [
+        (lf("access_jwt_token_simple_user"), HTTPStatus.NO_CONTENT),
+        (lf("access_jwt_token_another_user"), HTTPStatus.FORBIDDEN),
+    ],
+)
+def test_delete_task(client, db_session, jwt_token, expected_status_code, user_task):
+    """Тест обновление задачи."""
+    headers = {"Authorization": f"Bearer {jwt_token}"}
+    response = client.delete(f"/api/v1/tasks/{user_task.id}", headers=headers)
+    if response.status_code != HTTPStatus.NO_CONTENT:
+        print(response.json)
+    assert response.status_code == expected_status_code, "Полученный статус код отличается от ожидаемого"
+    if expected_status_code == HTTPStatus.NO_CONTENT:
+        assert db_session.query(Task).count() == 0, "Количество задач в базе данных не соответствует ожидаемому"
+    else:
+        assert db_session.query(Task).count() == 1, "Количество задач в базе данных не соответствует ожидаемому"
