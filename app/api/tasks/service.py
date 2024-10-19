@@ -80,7 +80,7 @@ def update_task(
     title: str,
     description: str,
     task_status_id: int,
-    complete_before: datetime,
+    complete_before: datetime | None = None,
     completed_at: datetime | None = None,
 ) -> Task:
     """Полное обновление задачи."""
