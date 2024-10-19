@@ -9,8 +9,8 @@ def test_jwt_create(client, simple_user, user_password):
         "email": simple_user.email,
         "password": user_password,
     }
-    response = client.post("/api/v1/users/jwt/create/", json=data)
 
+    response = client.post("/api/v1/users/jwt/create/", json=data)
     print(response.json)
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
@@ -25,7 +25,6 @@ def test_jwt_refresh(client, refresh_jwt_token):
     }
 
     response = client.post("/api/v1/users/jwt/refresh/", json=data)
-
     print(response.json)
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
@@ -41,7 +40,6 @@ def test_jwt_verify(client, refresh_jwt_token, access_jwt_token):
     }
 
     response = client.post("/api/v1/users/jwt/verify/", json=data)
-
     print(response.json)
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
@@ -62,9 +60,7 @@ def test_update_user_me(client, access_jwt_token, faker, db_session):
     headers = {"Authorization": f"Bearer {access_jwt_token}"}
 
     response = client.put(f"/api/v1/users/me/", json=data, headers=headers)
-
     print(response.json)
-    db_session.expire_all()
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
 
@@ -81,7 +77,6 @@ def test_delete_user_me(client, access_jwt_token, db_session):
     """Проверяет удаление текущего пользователя."""
     headers = {"Authorization": f"Bearer {access_jwt_token}"}
     response = client.delete("/api/v1/users/me/", headers=headers)
-
     if response.status_code != HTTPStatus.NO_CONTENT:
         print(response.json)
 
@@ -94,6 +89,7 @@ def test_get_user_me(client, access_jwt_token, simple_user):
     headers = {"Authorization": f"Bearer {access_jwt_token}"}
     response = client.get("/api/v1/users/me/", headers=headers)
     print(response.json)
+
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
     assert simple_user.email == response.json["email"], "Email не соответствует"
     assert simple_user.username == response.json["username"], "Username не соответствует"
@@ -129,14 +125,11 @@ def test_partial_update_user_me(client, access_jwt_token, faker, db_session, sim
     headers = {"Authorization": f"Bearer {access_jwt_token}"}
 
     response = client.patch(f"/api/v1/users/me/", json=data, headers=headers)
-
     print(response.json)
-    db_session.expire_all()
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
 
     db_session.refresh(simple_user)
-
     if data.get("email") is not None:
         assert simple_user.email == data["email"], "Email пользователя не соответствует"
     else:
@@ -166,7 +159,7 @@ def test_partial_update_user_me(client, access_jwt_token, faker, db_session, sim
 
 
 def test_create_user(client, faker, db_session):
-    """Проверяет обновление текущего пользователя."""
+    """Проверяет создание нового пользователя."""
     data = {
         "email": faker.email(),
         "username": faker.user_name(),
@@ -177,7 +170,6 @@ def test_create_user(client, faker, db_session):
     }
 
     response = client.post(f"/api/v1/users/register/", json=data)
-
     print(response.json)
 
     assert response.status_code == HTTPStatus.CREATED, "Код ответа отличается от ожидаемого"
