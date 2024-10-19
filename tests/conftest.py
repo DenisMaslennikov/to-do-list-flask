@@ -198,10 +198,10 @@ def access_jwt_token(simple_user, app) -> str:
 
 
 @pytest.fixture
-def user_tasks(db_session, faker, simple_user) -> None:
+def user_tasks(db_session, faker, simple_user) -> list[Task]:
     """Создает несколько задач для пользователя."""
-    MIN_TASK_AMOUNT = 1000
-    MAX_TASK_AMOUNT = 5000
+    MIN_TASK_AMOUNT = 10
+    MAX_TASK_AMOUNT = 50
     CHANCE_TO_UPDATE = 10
     CHANCE_TO_DEADLINE = 30
     task_amount = faker.random_int(MIN_TASK_AMOUNT, MAX_TASK_AMOUNT)
@@ -211,14 +211,14 @@ def user_tasks(db_session, faker, simple_user) -> None:
         task_status_id = random.choice(task_statuses).id
         completed_at = None
         if task_status_id == COMPLETED_TASK_STATUS_ID:
-            completed_at = faker.random_datetime()
+            completed_at = faker.date_time()
         created_at = faker.date_time()
         updated_at = None
         if faker.random_int(1, 100) <= CHANCE_TO_UPDATE:
             updated_at = faker.date_time_between(start_date=created_at, end_date=datetime.datetime.today())
         complete_before = None
         if faker.random_int(1, 100) <= CHANCE_TO_DEADLINE:
-            complete_before = faker.random_datetime()
+            complete_before = faker.date_time()
         task = Task(
             title=faker.text(max_nb_chars=255),
             description=faker.text(max_nb_chars=2000),
@@ -232,3 +232,4 @@ def user_tasks(db_session, faker, simple_user) -> None:
         tasks_to_add.append(task)
     db_session.bulk_save_objects(tasks_to_add)
     db_session.commit()
+    return tasks_to_add

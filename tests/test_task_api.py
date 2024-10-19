@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+import pytest
 from sqlalchemy import func
 
 from app.models import TaskStatus, Task
@@ -40,3 +41,12 @@ def test_create_task(client, db_session, faker, access_jwt_token):
         assert task_from_db.complete_before == data["complete_before"], "Срок выполнения задачи не совпадает"
     if data.get("complete_at") is not None:
         assert task_from_db.completed_at == data["completed_at"], "Время выполнения задачи не совпадает"
+
+
+def test_get_task_list(client, db_session, access_jwt_token, user_tasks):
+    """Проверяет получение списка задач для текущего пользователя."""
+    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+    response = client.get("/api/v1/tasks/", headers=headers)
+    print(response.json)
+    assert response.status_code == HTTPStatus.OK, "Получен код ответа отличный от ожидаемого"
+    assert response.json["count"] == len(user_tasks), "Количество задач не совпадает"
