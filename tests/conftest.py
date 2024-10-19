@@ -4,8 +4,9 @@ import random
 
 import pytest
 from faker import Faker
+from flask import Flask
 from flask.testing import FlaskClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
@@ -51,7 +52,7 @@ def database_test_container():
 
 
 @pytest.fixture(scope="session")
-def app(database_test_container):
+def app(database_test_container) -> Flask:
     """Приложение фласк для тестирования."""
     app = get_app(TestingConfig)
     app.config["DATABASE_URI"] = (
@@ -66,7 +67,7 @@ def app(database_test_container):
 
 
 @pytest.fixture(scope="session")
-def create_db(app):
+def create_db(app) -> None:
     """Создание тестовой базы данных."""
     uri = app.config.get("DATABASE_URI")
     if database_exists(uri):
@@ -99,7 +100,7 @@ def migrations(app, create_db):
 
 
 @pytest.fixture(scope="session")
-def engine(app, migrations):
+def engine(app, migrations) -> Engine:
     """Создает engine SQLAlchemy для взаимодействия с базой."""
     uri = app.config.get("DATABASE_URI")
     engine = create_engine(uri)
@@ -108,7 +109,7 @@ def engine(app, migrations):
 
 
 @pytest.fixture(scope="function")
-def db_session(engine):
+def db_session(engine) -> Session:
     """Создает и возвращает сессию базы данных для тестирования."""
     connection = engine.connect()
     transaction = connection.begin()
@@ -130,7 +131,7 @@ def mock_session(mocker, db_session):
     """Патчит сессию подменяя её фикстурой."""
 
     @contextlib.contextmanager
-    def mock_session_scope():
+    def mock_session_scope() -> Session:
         """Патч контекстного менеджера управляющего сессией."""
         try:
             yield db_session
@@ -183,14 +184,14 @@ def simple_user(db_session, faker, user_password) -> User:
 
 
 @pytest.fixture
-def refresh_jwt_token(simple_user, app):
+def refresh_jwt_token(simple_user, app) -> str:
     return generate_token(
         str(simple_user.id), app.config["JWT_REFRESH_SECRET_KEY"], app.config["JWT_REFRESH_EXPIRATION_DELTA"]
     )
 
 
 @pytest.fixture
-def access_jwt_token(simple_user, app):
+def access_jwt_token(simple_user, app) -> str:
     return generate_token(
         str(simple_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
     )
@@ -231,4 +232,3 @@ def user_tasks(db_session, faker, simple_user) -> None:
         tasks_to_add.append(task)
     db_session.bulk_save_objects(tasks_to_add)
     db_session.commit()
-
