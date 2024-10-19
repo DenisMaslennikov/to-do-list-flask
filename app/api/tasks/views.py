@@ -63,6 +63,9 @@ class TaskResource(Resource):
         """Полное обновление задачи."""
         return update_task(user_id=current_user_id, task_id=task_id, **ns.payload)
 
-    def delete(self, current_user_id: UUID, task_id: UUID) -> None:
+    @ns.doc(security="jwt", code=HTTPStatus.NO_CONTENT)
+    @ns.response(HTTPStatus.NO_CONTENT, "NO CONTENT")
+    def delete(self, current_user_id: UUID, task_id: UUID) -> tuple[None, int]:
         """Удаление задачи по id."""
         delete_task(user_id=current_user_id, task_id=task_id)
+        return None, HTTPStatus.NO_CONTENT
