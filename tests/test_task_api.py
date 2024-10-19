@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 import pytest
-from coverage import data
 from pytest_lazy_fixtures import lf
 
 from app.models import Task
