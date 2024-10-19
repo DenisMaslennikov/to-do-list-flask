@@ -105,3 +105,73 @@ def test_get_user_me(client, access_jwt_token, simple_user):
     assert simple_user.first_name == response.json["first_name"], "Имя не соответствует"
     assert simple_user.second_name == response.json["second_name"], "Фамилия не соответствует"
     assert simple_user.middle_name == response.json["middle_name"], "Отчество не соответствует"
+
+
+def test_partial_update_user_me(
+    client,
+    access_jwt_token,
+    faker,
+    db_session,
+    simple_user,
+    user_password,
+):
+    """Проверяет частичное обновление текущего пользователя."""
+    CHANCE_TO_CHANGE_DATA = 30
+    data = {}
+    old_data = {
+        "email": simple_user.email,
+        "username": simple_user.username,
+        "first_name": simple_user.first_name,
+        "second_name": simple_user.second_name,
+        "middle_name": simple_user.middle_name,
+    }
+    if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
+        data["email"] = faker.email()
+    if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
+        data["username"] = faker.user_name()
+    if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
+        data["password"] = faker.password()
+    if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
+        data["first_name"] = faker.first_name()
+    if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
+        data["second_name"] = faker.last_name()
+    if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
+        data["middle_name"] = faker.middle_name()
+
+    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+
+    response = client.patch(f"/api/v1/users/me/", json=data, headers=headers)
+
+    print(response.json)
+    db_session.expire_all()
+
+    assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
+
+    db_session.refresh(simple_user)
+
+    if data.get("email") is not None:
+        assert simple_user.email == data["email"], "Email пользователя не соответствует"
+    else:
+        assert simple_user.email == old_data["email"], "Email пользователя не передавался но был изменен"
+    if data.get("first_name") is not None:
+        assert simple_user.first_name == data["first_name"], "Имя пользователя не совпадает с переданным"
+    else:
+        assert simple_user.first_name == old_data["first_name"], "Имя пользователя не передавалось но было изменено"
+    if data.get("second_name") is not None:
+        assert simple_user.second_name == data["second_name"], "Фамилия пользователя не совпадает с переданным"
+    else:
+        assert (
+            simple_user.second_name == old_data["second_name"]
+        ), "Фамилия пользователя не передавалась но была изменена"
+    if data.get("middle_name") is not None:
+        assert simple_user.middle_name == data["middle_name"], "Отчество пользователя не совпадает с переданным"
+    else:
+        assert simple_user.middle_name == old_data["middle_name"], "Отчество не передавалось но было изменено"
+    if data.get("username") is not None:
+        assert simple_user.username == data["username"], "Username пользователя не совпадает с переданным"
+    else:
+        assert simple_user.username == old_data["username"], "Username не передавался но был изменен"
+    if data.get("password") is not None:
+        assert simple_user.check_password(data["password"]), "Пароль пользователя не совпадает с переданным"
+    else:
+        assert simple_user.check_password(user_password), "Пароль не передавался но был изменен"
