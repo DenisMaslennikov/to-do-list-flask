@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16.4
+    env_file: ./config/.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    image: ktotom7/to-do-list-flask
+    command: bash /src/docker/prod/api/run_prod.sh
+    ports:
+      - "8001:8001"
+    env_file: ./config/.env
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  pgdata:

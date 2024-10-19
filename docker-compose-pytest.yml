@@ -12,7 +12,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: docker/api/Dockerfile
+      dockerfile: docker/dev/api/Dockerfile
     env_file: ./config/.env
     volumes:
       - ".:/src/"

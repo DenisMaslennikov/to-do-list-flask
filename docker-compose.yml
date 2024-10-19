@@ -12,8 +12,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: docker/api/Dockerfile
-    command: bash /src/docker/api/run_dev.sh
+      dockerfile: docker/dev/api/Dockerfile
+    command: bash /src/docker/dev/api/run_dev.sh
     env_file: ./config/.env
     ports:
       - "5000:5000"
