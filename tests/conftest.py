@@ -1,3 +1,5 @@
+import contextlib
+
 import pytest
 from faker import Faker
 from flask.testing import FlaskClient
@@ -123,9 +125,21 @@ def db_session(engine):
 @pytest.fixture(scope="function", autouse=True)
 def mock_session(mocker, db_session):
     """Патчит сессию подменяя её фикстурой."""
-    mocker.patch("app.api.users.service.session_scope", return_value=db_session)
-    mocker.patch("app.api.tasks.service.session_scope", return_value=db_session)
-    mocker.patch("app.api.classifiers.service.session_scope", return_value=db_session)
+
+    @contextlib.contextmanager
+    def mock_session_scope():
+        """Патч контекстного менеджера управляющего сессией."""
+        try:
+            yield db_session
+            db_session.commit()
+        except Exception:
+            db_session.rollback()
+            raise
+
+    # mocker.patch("app.tools.session.session_scope", side_effect=mock_session_scope)
+    mocker.patch("app.api.users.service.session_scope", side_effect=mock_session_scope)
+    mocker.patch("app.api.tasks.service.session_scope", side_effect=mock_session_scope)
+    mocker.patch("app.api.classifiers.service.session_scope", side_effect=mock_session_scope)
 
 
 @pytest.fixture
