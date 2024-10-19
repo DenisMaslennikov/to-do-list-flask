@@ -1,4 +1,6 @@
 import contextlib
+import datetime
+import random
 
 import pytest
 from faker import Faker
@@ -10,9 +12,10 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from app import get_app
-from app.models import User
+from app.models import User, Task, TaskStatus
 from app.tools.jwt import generate_token
 from config import TestingConfig
+from constants import COMPLETED_TASK_STATUS_ID
 from tests.functions import wait_for_port
 
 
@@ -191,3 +194,41 @@ def access_jwt_token(simple_user, app):
     return generate_token(
         str(simple_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
     )
+
+
+@pytest.fixture
+def user_tasks(db_session, faker, simple_user) -> None:
+    """Создает несколько задач для пользователя."""
+    MIN_TASK_AMOUNT = 1
+    MAX_TASK_AMOUNT = 10
+    CHANCE_TO_UPDATE = 10
+    CHANCE_TO_DEADLINE = 30
+    task_amount = faker.random_int(MAX_TASK_AMOUNT, MAX_TASK_AMOUNT)
+    tasks_to_add = []
+    task_statuses: list[TaskStatus] = db_session.query(TaskStatus).all()
+    for _ in range(task_amount):
+        task_status_id = random.choice(task_statuses).id
+        completed_at = None
+        if task_status_id == COMPLETED_TASK_STATUS_ID:
+            completed_at = faker.random_datetime()
+        created_at = faker.date_time()
+        updated_at = None
+        if faker.random_int(1, 100) <= CHANCE_TO_UPDATE:
+            updated_at = faker.date_time_between(start_date=created_at, end_date=datetime.datetime.today())
+        complete_before = None
+        if faker.random_int(1, 100) <= CHANCE_TO_DEADLINE:
+            complete_before = faker.random_datetime()
+        task = Task(
+            title=faker.text(max_nb_chars=255),
+            description=faker.text(max_nb_chars=2000),
+            task_status_id=task_status_id,
+            completed_at=completed_at,
+            created_at=created_at,
+            updated_at=updated_at,
+            user_id=simple_user.id,
+            complete_before=complete_before,
+        )
+        tasks_to_add.append(task)
+    db_session.bulk_save_objects(tasks_to_add)
+    db_session.commit()
+
