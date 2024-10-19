@@ -2,30 +2,14 @@ from http import HTTPStatus
 
 import pytest
 from pytest_lazy_fixtures import lf
-from sqlalchemy import func
 
-from app.models import Task, TaskStatus
-from constants import COMPLETED_TASK_STATUS_ID
+from app.models import Task
+from tests.functions import check_task, task_dict
 
 
 def test_create_task(client, db_session, faker, access_jwt_token_simple_user):
     """Проверяет создание новой задачи."""
-    CHANCE_TO_OPTIONAL_DATA = 30
-    task_status_id: int = db_session.query(TaskStatus).order_by(func.random()).first().id
-    data = {
-        "title": faker.text(max_nb_chars=255),
-        "description": faker.text(max_nb_chars=500),
-        "task_status_id": task_status_id,
-    }
-
-    if faker.random_int(1, 100) <= CHANCE_TO_OPTIONAL_DATA:
-        data["complete_before"] = faker.date_time().replace(microsecond=0)
-
-    if task_status_id == COMPLETED_TASK_STATUS_ID:
-        if data.get("complete_before") is None:
-            data["completed_at"] = faker.date_time().replace(microsecond=0)
-        else:
-            data["completed_at"] = faker.date_time_between(end_date=data["complete_before"]).replace(microsecond=0)
+    data = task_dict(db_session, faker)
 
     headers = {
         "Authorization": f"Bearer {access_jwt_token_simple_user}",
@@ -34,14 +18,7 @@ def test_create_task(client, db_session, faker, access_jwt_token_simple_user):
     response = client.post("/api/v1/tasks/", json=data, headers=headers)
     assert response.status_code == HTTPStatus.CREATED
     task_from_db: Task = db_session.query(Task).filter(Task.id == response.json["id"]).first()
-    assert task_from_db is not None, "Задача не найдена в бд"
-    assert task_from_db.task_status_id == data["task_status_id"], "Статус задачи не совпадает"
-    assert task_from_db.title == data["title"], "Заголовок задачи не совпадает"
-    assert task_from_db.description == data["description"], "Описание задачи не совпадает"
-    if data.get("complete_before") is not None:
-        assert task_from_db.complete_before == data["complete_before"], "Срок выполнения задачи не совпадает"
-    if data.get("complete_at") is not None:
-        assert task_from_db.completed_at == data["completed_at"], "Время выполнения задачи не совпадает"
+    check_task(task_from_db, data)
 
 
 @pytest.mark.parametrize(
@@ -57,4 +34,23 @@ def test_get_task_list(client, db_session, jwt_token, results):
     response = client.get("/api/v1/tasks/", headers=headers)
     print(response.json)
     assert response.status_code == HTTPStatus.OK, "Получен код ответа отличный от ожидаемого"
-    assert response.json["count"] == len(results), "Количество задач не совпадает"
+    assert response.json["count"] == len(results), "Количество задач не совпадает с ожидаемым"
+
+
+@pytest.mark.parametrize(
+    ("jwt_token", "expected_status_code"),
+    [
+        (lf("access_jwt_token_simple_user"), HTTPStatus.OK),
+        (lf("access_jwt_token_another_user"), HTTPStatus.FORBIDDEN),
+    ],
+)
+def test_update_task(client, db_session, jwt_token, expected_status_code, user_task, faker):
+    """Тест обновление задачи."""
+    headers = {"Authorization": f"Bearer {jwt_token}"}
+    data = task_dict(db_session, faker)
+    response = client.put(f"/api/v1/tasks/{user_task.id}", headers=headers, json=data)
+    print(response.json)
+    assert response.status_code == expected_status_code, "Полученный статус код отличается от ожидаемого"
+
+    db_session.refresh(user_task)
+    check_task(user_task, data)

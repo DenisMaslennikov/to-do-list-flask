@@ -1,5 +1,4 @@
 import contextlib
-import datetime
 import random
 
 import pytest
@@ -16,8 +15,7 @@ from app import get_app
 from app.models import Task, TaskStatus, User
 from app.tools.jwt import generate_token
 from config import TestingConfig
-from constants import COMPLETED_TASK_STATUS_ID
-from tests.functions import wait_for_port, create_test_task
+from tests.functions import create_test_task, wait_for_port
 
 
 @pytest.fixture

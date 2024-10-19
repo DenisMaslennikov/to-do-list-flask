@@ -4,8 +4,10 @@ import time
 from uuid import UUID
 
 from faker import Faker
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
-from app.models import Task
+from app.models import Task, TaskStatus
 from constants import COMPLETED_TASK_STATUS_ID
 
 
@@ -47,3 +49,37 @@ def create_test_task(task_status_id: int, user_id: UUID, faker: Faker) -> Task:
         complete_before=complete_before,
     )
     return task
+
+
+def task_dict(db_session: Session, faker: Faker) -> dict[str, str | datetime.datetime]:
+    """Генерирует словарь с задачей для использования в put и post запросах."""
+    CHANCE_TO_OPTIONAL_DATA = 30
+
+    task_status_id: int = db_session.query(TaskStatus).order_by(func.random()).first().id
+    data = {
+        "title": faker.text(max_nb_chars=255),
+        "description": faker.text(max_nb_chars=500),
+        "task_status_id": task_status_id,
+    }
+
+    if faker.random_int(1, 100) <= CHANCE_TO_OPTIONAL_DATA:
+        data["complete_before"] = faker.date_time().replace(microsecond=0)
+
+    if task_status_id == COMPLETED_TASK_STATUS_ID:
+        if data.get("complete_before") is None:
+            data["completed_at"] = faker.date_time().replace(microsecond=0)
+        else:
+            data["completed_at"] = faker.date_time_between(end_date=data["complete_before"]).replace(microsecond=0)
+    return data
+
+
+def check_task(task_from_db, data) -> None:
+    """Проверяет соответствие задачи из DB и словаря с данными в случае несовпадения поднимает AssertationError."""
+    assert task_from_db is not None, "Задача не найдена в бд"
+    assert task_from_db.task_status_id == data["task_status_id"], "Статус задачи не совпадает"
+    assert task_from_db.title == data["title"], "Заголовок задачи не совпадает"
+    assert task_from_db.description == data["description"], "Описание задачи не совпадает"
+    if data.get("complete_before") is not None:
+        assert task_from_db.complete_before == data["complete_before"], "Срок выполнения задачи не совпадает"
+    if data.get("complete_at") is not None:
+        assert task_from_db.completed_at == data["completed_at"], "Время выполнения задачи не совпадает"
