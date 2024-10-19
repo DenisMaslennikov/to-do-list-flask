@@ -17,7 +17,7 @@ from app.models import Task, TaskStatus, User
 from app.tools.jwt import generate_token
 from config import TestingConfig
 from constants import COMPLETED_TASK_STATUS_ID
-from tests.functions import wait_for_port
+from tests.functions import wait_for_port, create_test_task
 
 
 @pytest.fixture
@@ -208,7 +208,7 @@ def another_user(db_session, faker, simple_user_password) -> User:
 
 @pytest.fixture
 def refresh_jwt_token_simple_user(simple_user, app) -> str:
-    """Рефреш токен для первого пользователя"""
+    """Рефреш токен для первого пользователя."""
     return generate_token(
         str(simple_user.id), app.config["JWT_REFRESH_SECRET_KEY"], app.config["JWT_REFRESH_EXPIRATION_DELTA"]
     )
@@ -216,7 +216,7 @@ def refresh_jwt_token_simple_user(simple_user, app) -> str:
 
 @pytest.fixture
 def access_jwt_token_simple_user(simple_user, app) -> str:
-    """Ассес токен для первого пользователя"""
+    """Ассес токен для первого пользователя."""
     return generate_token(
         str(simple_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
     )
@@ -224,7 +224,7 @@ def access_jwt_token_simple_user(simple_user, app) -> str:
 
 @pytest.fixture
 def access_jwt_token_another_user(another_user, app) -> str:
-    """Ассес токен для второго пользователя"""
+    """Ассес токен для второго пользователя."""
     return generate_token(
         str(another_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
     )
@@ -235,33 +235,12 @@ def user_tasks(db_session, faker, simple_user) -> list[Task]:
     """Создает несколько задач для пользователя."""
     MIN_TASK_AMOUNT = 10
     MAX_TASK_AMOUNT = 50
-    CHANCE_TO_UPDATE = 10
-    CHANCE_TO_DEADLINE = 30
     task_amount = faker.random_int(MIN_TASK_AMOUNT, MAX_TASK_AMOUNT)
     tasks_to_add = []
     task_statuses: list[TaskStatus] = db_session.query(TaskStatus).all()
     for _ in range(task_amount):
         task_status_id = random.choice(task_statuses).id
-        completed_at = None
-        if task_status_id == COMPLETED_TASK_STATUS_ID:
-            completed_at = faker.date_time()
-        created_at = faker.date_time()
-        updated_at = None
-        if faker.random_int(1, 100) <= CHANCE_TO_UPDATE:
-            updated_at = faker.date_time_between(start_date=created_at, end_date=datetime.datetime.today())
-        complete_before = None
-        if faker.random_int(1, 100) <= CHANCE_TO_DEADLINE:
-            complete_before = faker.date_time()
-        task = Task(
-            title=faker.text(max_nb_chars=255),
-            description=faker.text(max_nb_chars=2000),
-            task_status_id=task_status_id,
-            completed_at=completed_at,
-            created_at=created_at,
-            updated_at=updated_at,
-            user_id=simple_user.id,
-            complete_before=complete_before,
-        )
+        task = create_test_task(task_status_id, simple_user.id, faker)
         tasks_to_add.append(task)
     db_session.bulk_save_objects(tasks_to_add)
     db_session.commit()
@@ -271,30 +250,9 @@ def user_tasks(db_session, faker, simple_user) -> list[Task]:
 @pytest.fixture
 def user_task(db_session, faker, simple_user) -> Task:
     """Создает несколько задач для пользователя."""
-    CHANCE_TO_UPDATE = 10
-    CHANCE_TO_DEADLINE = 30
     task_statuses: list[TaskStatus] = db_session.query(TaskStatus).all()
     task_status_id = random.choice(task_statuses).id
-    completed_at = None
-    if task_status_id == COMPLETED_TASK_STATUS_ID:
-        completed_at = faker.date_time()
-    created_at = faker.date_time()
-    updated_at = None
-    if faker.random_int(1, 100) <= CHANCE_TO_UPDATE:
-        updated_at = faker.date_time_between(start_date=created_at, end_date=datetime.datetime.today())
-    complete_before = None
-    if faker.random_int(1, 100) <= CHANCE_TO_DEADLINE:
-        complete_before = faker.date_time()
-    task = Task(
-        title=faker.text(max_nb_chars=255),
-        description=faker.text(max_nb_chars=2000),
-        task_status_id=task_status_id,
-        completed_at=completed_at,
-        created_at=created_at,
-        updated_at=updated_at,
-        user_id=simple_user.id,
-        complete_before=complete_before,
-    )
+    task = create_test_task(task_status_id, simple_user.id, faker)
     db_session.add(task)
     db_session.commit()
     return task
