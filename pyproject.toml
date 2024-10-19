@@ -193,9 +193,21 @@ line-length = 120
 target-version = ["py312"]
 
 [tool.pytest.ini_options]
-addopts = "-vvv"
+addopts = [
+    "-vvv",
+    "--cov=app",                    # Покрывать весь код проекта
+    "--cov-report=term-missing",   # Формат отчета: вывод в терминал с пропущенными строками
+    "--cov-config=pyproject.toml"
+]
 python_files = "test_*.py"
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::SyntaxWarning",
+]
+
+[tool.coverage.run]
+# Исключаем директории с тестами и миграциями из покрытия
+omit = [
+    "tests/*",        # Исключаем всю директорию с тестами
+    "alembic/*"    # Исключаем директорию с миграциями Alembic
 ]
