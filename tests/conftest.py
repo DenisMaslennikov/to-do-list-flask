@@ -200,11 +200,11 @@ def access_jwt_token(simple_user, app) -> str:
 @pytest.fixture
 def user_tasks(db_session, faker, simple_user) -> None:
     """Создает несколько задач для пользователя."""
-    MIN_TASK_AMOUNT = 1
-    MAX_TASK_AMOUNT = 10
+    MIN_TASK_AMOUNT = 1000
+    MAX_TASK_AMOUNT = 5000
     CHANCE_TO_UPDATE = 10
     CHANCE_TO_DEADLINE = 30
-    task_amount = faker.random_int(MAX_TASK_AMOUNT, MAX_TASK_AMOUNT)
+    task_amount = faker.random_int(MIN_TASK_AMOUNT, MAX_TASK_AMOUNT)
     tasks_to_add = []
     task_statuses: list[TaskStatus] = db_session.query(TaskStatus).all()
     for _ in range(task_amount):
