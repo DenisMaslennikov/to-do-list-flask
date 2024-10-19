@@ -73,13 +73,28 @@ def task_dict(db_session: Session, faker: Faker) -> dict[str, str | datetime.dat
     return data
 
 
-def check_task(task_from_db, data) -> None:
+def check_task(task_from_db: Task, data: dict[str, str | datetime.datetime]) -> None:
     """Проверяет соответствие задачи из DB и словаря с данными в случае несовпадения поднимает AssertationError."""
     assert task_from_db is not None, "Задача не найдена в бд"
-    assert task_from_db.task_status_id == data["task_status_id"], "Статус задачи не совпадает"
+    if "task_status_id" in data:
+        assert task_from_db.task_status_id == data["task_status_id"], "Статус задачи не совпадает"
+    elif "task_status" in data:
+        assert task_from_db.task_status_id == data["task_status"]["id"], "Статус задачи не совпадает"
     assert task_from_db.title == data["title"], "Заголовок задачи не совпадает"
     assert task_from_db.description == data["description"], "Описание задачи не совпадает"
-    if data.get("complete_before") is not None:
+    if "complete_before" in data:
+        if isinstance(data["complete_before"], str):
+            data["complete_before"] = datetime.datetime.fromisoformat(data["complete_before"])
         assert task_from_db.complete_before == data["complete_before"], "Срок выполнения задачи не совпадает"
-    if data.get("complete_at") is not None:
+    if "complete_at" in data:
+        if isinstance(data["complete_at"], str):
+            data["complete_at"] = datetime.datetime.fromisoformat(data["complete_at"])
         assert task_from_db.completed_at == data["completed_at"], "Время выполнения задачи не совпадает"
+    if "created_at" in data:
+        if isinstance(data["created_at"], str):
+            data["created_at"] = datetime.datetime.fromisoformat(data["created_at"])
+        assert task_from_db.created_at == data["created_at"], "Дата создания не совпадает"
+    if "updated_at" in data:
+        if isinstance(data["created_at"], str):
+            data["updated_at"] = datetime.datetime.fromisoformat(data["updated_at"])
+        assert task_from_db.updated_at == data["updated_at"], "Дата обновления не совпадает"
