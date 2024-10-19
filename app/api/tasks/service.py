@@ -39,7 +39,14 @@ def get_task_list_for_user(
         return {"results": results, "count": count}
 
 
-def create_task(user_id: UUID, title: str, description: str, task_status_id: int, complete_before: datetime) -> Task:
+def create_task(
+    user_id: UUID,
+    title: str,
+    description: str,
+    task_status_id: int,
+    complete_before: datetime = None,
+    completed_at: datetime = None,
+) -> Task:
     """Создаёт задачу для пользователя."""
     with session_scope() as session:
         task = create_task_repo(
@@ -49,6 +56,7 @@ def create_task(user_id: UUID, title: str, description: str, task_status_id: int
             description=description,
             task_status_id=task_status_id,
             complete_before=complete_before,
+            completed_at=completed_at,
         )
         session.flush()
         task = get_task_repo(session, task_id=task.id, load_related=True)
