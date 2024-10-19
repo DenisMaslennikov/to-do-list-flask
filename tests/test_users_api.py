@@ -49,12 +49,7 @@ def test_jwt_verify(client, refresh_jwt_token, access_jwt_token):
     assert response.json["refresh"] is True, "Refresh токен определен как невалидный"
 
 
-def test_update_user_me(
-    client,
-    access_jwt_token,
-    faker,
-    db_session,
-):
+def test_update_user_me(client, access_jwt_token, faker, db_session):
     """Проверяет обновление текущего пользователя."""
     data = {
         "email": faker.email(),
@@ -107,14 +102,7 @@ def test_get_user_me(client, access_jwt_token, simple_user):
     assert simple_user.middle_name == response.json["middle_name"], "Отчество не соответствует"
 
 
-def test_partial_update_user_me(
-    client,
-    access_jwt_token,
-    faker,
-    db_session,
-    simple_user,
-    user_password,
-):
+def test_partial_update_user_me(client, access_jwt_token, faker, db_session, simple_user, user_password):
     """Проверяет частичное обновление текущего пользователя."""
     CHANCE_TO_CHANGE_DATA = 30
     data = {}
@@ -175,3 +163,29 @@ def test_partial_update_user_me(
         assert simple_user.check_password(data["password"]), "Пароль пользователя не совпадает с переданным"
     else:
         assert simple_user.check_password(user_password), "Пароль не передавался но был изменен"
+
+
+def test_create_user(client, faker, db_session):
+    """Проверяет обновление текущего пользователя."""
+    data = {
+        "email": faker.email(),
+        "username": faker.user_name(),
+        "password": faker.password(),
+        "first_name": faker.first_name(),
+        "second_name": faker.last_name(),
+        "middle_name": faker.middle_name(),
+    }
+
+    response = client.post(f"/api/v1/users/register/", json=data)
+
+    print(response.json)
+
+    assert response.status_code == HTTPStatus.CREATED, "Код ответа отличается от ожидаемого"
+
+    user_from_db: User = db_session.query(User).filter(User.email == data["email"]).first()
+    assert user_from_db is not None, "Пользователь не найден в базе данных по email"
+    assert user_from_db.first_name == data["first_name"], "Имя пользователя не совпадает с переданным"
+    assert user_from_db.second_name == data["second_name"], "Фамилия пользователя не совпадает с переданным"
+    assert user_from_db.middle_name == data["middle_name"], "Отчество пользователя не совпадает с переданным"
+    assert user_from_db.username == data["username"], "Username пользователя не совпадает с переданным"
+    assert user_from_db.check_password(data["password"]), "Пароль пользователя не совпадает с переданным"
