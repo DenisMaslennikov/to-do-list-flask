@@ -6,14 +6,14 @@ import pytest
 from faker import Faker
 from flask import Flask
 from flask.testing import FlaskClient
-from sqlalchemy import create_engine, Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from app import get_app
-from app.models import User, Task, TaskStatus
+from app.models import Task, TaskStatus, User
 from app.tools.jwt import generate_token
 from config import TestingConfig
 from constants import COMPLETED_TASK_STATUS_ID
@@ -161,13 +161,19 @@ def client(app) -> FlaskClient:
 
 
 @pytest.fixture
-def user_password(faker) -> str:
+def simple_user_password(faker) -> str:
     """Генерирует пароль пользователя."""
     return faker.password()
 
 
 @pytest.fixture
-def simple_user(db_session, faker, user_password) -> User:
+def another_user_password(faker) -> str:
+    """Генерирует пароль пользователя."""
+    return faker.password()
+
+
+@pytest.fixture
+def simple_user(db_session, faker, simple_user_password) -> User:
     """Обычный пользователь."""
     email = faker.email()
     user = User(
@@ -177,23 +183,50 @@ def simple_user(db_session, faker, user_password) -> User:
         middle_name=faker.middle_name(),
         username=faker.user_name(),
     )
-    user.password = user_password
+    user.password = simple_user_password
     db_session.add(user)
     db_session.commit()
     return user
 
 
 @pytest.fixture
-def refresh_jwt_token(simple_user, app) -> str:
+def another_user(db_session, faker, simple_user_password) -> User:
+    """Пользователь без задач."""
+    email = faker.email()
+    user = User(
+        email=email,
+        first_name=faker.first_name(),
+        second_name=faker.last_name(),
+        middle_name=faker.middle_name(),
+        username=faker.user_name(),
+    )
+    user.password = simple_user_password
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def refresh_jwt_token_simple_user(simple_user, app) -> str:
+    """Рефреш токен для первого пользователя"""
     return generate_token(
         str(simple_user.id), app.config["JWT_REFRESH_SECRET_KEY"], app.config["JWT_REFRESH_EXPIRATION_DELTA"]
     )
 
 
 @pytest.fixture
-def access_jwt_token(simple_user, app) -> str:
+def access_jwt_token_simple_user(simple_user, app) -> str:
+    """Ассес токен для первого пользователя"""
     return generate_token(
         str(simple_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
+    )
+
+
+@pytest.fixture
+def access_jwt_token_another_user(another_user, app) -> str:
+    """Ассес токен для второго пользователя"""
+    return generate_token(
+        str(another_user.id), app.config["JWT_ACCESS_SECRET_KEY"], app.config["JWT_ACCESS_EXPIRATION_DELTA"]
     )
 
 
@@ -233,3 +266,35 @@ def user_tasks(db_session, faker, simple_user) -> list[Task]:
     db_session.bulk_save_objects(tasks_to_add)
     db_session.commit()
     return tasks_to_add
+
+
+@pytest.fixture
+def user_task(db_session, faker, simple_user) -> Task:
+    """Создает несколько задач для пользователя."""
+    CHANCE_TO_UPDATE = 10
+    CHANCE_TO_DEADLINE = 30
+    task_statuses: list[TaskStatus] = db_session.query(TaskStatus).all()
+    task_status_id = random.choice(task_statuses).id
+    completed_at = None
+    if task_status_id == COMPLETED_TASK_STATUS_ID:
+        completed_at = faker.date_time()
+    created_at = faker.date_time()
+    updated_at = None
+    if faker.random_int(1, 100) <= CHANCE_TO_UPDATE:
+        updated_at = faker.date_time_between(start_date=created_at, end_date=datetime.datetime.today())
+    complete_before = None
+    if faker.random_int(1, 100) <= CHANCE_TO_DEADLINE:
+        complete_before = faker.date_time()
+    task = Task(
+        title=faker.text(max_nb_chars=255),
+        description=faker.text(max_nb_chars=2000),
+        task_status_id=task_status_id,
+        completed_at=completed_at,
+        created_at=created_at,
+        updated_at=updated_at,
+        user_id=simple_user.id,
+        complete_before=complete_before,
+    )
+    db_session.add(task)
+    db_session.commit()
+    return task

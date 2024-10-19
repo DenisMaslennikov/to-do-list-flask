@@ -3,11 +3,11 @@ from http import HTTPStatus
 from app.models import User
 
 
-def test_jwt_create(client, simple_user, user_password):
+def test_jwt_create(client, simple_user, simple_user_password):
     """Проверка получения access и refresh токенов."""
     data = {
         "email": simple_user.email,
-        "password": user_password,
+        "password": simple_user_password,
     }
 
     response = client.post("/api/v1/users/jwt/create/", json=data)
@@ -18,10 +18,10 @@ def test_jwt_create(client, simple_user, user_password):
     assert "refresh" in response.json, "В ответе не найден refresh токен"
 
 
-def test_jwt_refresh(client, refresh_jwt_token):
+def test_jwt_refresh(client, refresh_jwt_token_simple_user):
     """Проверяет обновление access токена по рефреш токену."""
     data = {
-        "refresh": refresh_jwt_token,
+        "refresh": refresh_jwt_token_simple_user,
     }
 
     response = client.post("/api/v1/users/jwt/refresh/", json=data)
@@ -32,11 +32,11 @@ def test_jwt_refresh(client, refresh_jwt_token):
     assert "refresh" in response.json, "В ответе не найден refresh токен"
 
 
-def test_jwt_verify(client, refresh_jwt_token, access_jwt_token):
+def test_jwt_verify(client, refresh_jwt_token_simple_user, access_jwt_token_simple_user):
     """Проверяет обновление access токена по рефреш токену."""
     data = {
-        "access": access_jwt_token,
-        "refresh": refresh_jwt_token,
+        "access": access_jwt_token_simple_user,
+        "refresh": refresh_jwt_token_simple_user,
     }
 
     response = client.post("/api/v1/users/jwt/verify/", json=data)
@@ -47,7 +47,7 @@ def test_jwt_verify(client, refresh_jwt_token, access_jwt_token):
     assert response.json["refresh"] is True, "Refresh токен определен как невалидный"
 
 
-def test_update_user_me(client, access_jwt_token, faker, db_session):
+def test_update_user_me(client, access_jwt_token_simple_user, faker, db_session):
     """Проверяет обновление текущего пользователя."""
     data = {
         "email": faker.email(),
@@ -57,9 +57,9 @@ def test_update_user_me(client, access_jwt_token, faker, db_session):
         "second_name": faker.last_name(),
         "middle_name": faker.middle_name(),
     }
-    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+    headers = {"Authorization": f"Bearer {access_jwt_token_simple_user}"}
 
-    response = client.put(f"/api/v1/users/me/", json=data, headers=headers)
+    response = client.put("/api/v1/users/me/", json=data, headers=headers)
     print(response.json)
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
@@ -73,9 +73,9 @@ def test_update_user_me(client, access_jwt_token, faker, db_session):
     assert user_from_db.check_password(data["password"]), "Пароль пользователя не совпадает с переданным"
 
 
-def test_delete_user_me(client, access_jwt_token, db_session):
+def test_delete_user_me(client, access_jwt_token_simple_user, db_session):
     """Проверяет удаление текущего пользователя."""
-    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+    headers = {"Authorization": f"Bearer {access_jwt_token_simple_user}"}
     response = client.delete("/api/v1/users/me/", headers=headers)
     if response.status_code != HTTPStatus.NO_CONTENT:
         print(response.json)
@@ -84,9 +84,9 @@ def test_delete_user_me(client, access_jwt_token, db_session):
     assert db_session.query(User).count() == 0, "Количество пользователей в бд не соответствует ожидаемому"
 
 
-def test_get_user_me(client, access_jwt_token, simple_user):
+def test_get_user_me(client, access_jwt_token_simple_user, simple_user):
     """Проверяет получение информации о текущем пользователе."""
-    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+    headers = {"Authorization": f"Bearer {access_jwt_token_simple_user}"}
     response = client.get("/api/v1/users/me/", headers=headers)
     print(response.json)
 
@@ -98,7 +98,9 @@ def test_get_user_me(client, access_jwt_token, simple_user):
     assert simple_user.middle_name == response.json["middle_name"], "Отчество не соответствует"
 
 
-def test_partial_update_user_me(client, access_jwt_token, faker, db_session, simple_user, user_password):
+def test_partial_update_user_me(
+    client, access_jwt_token_simple_user, faker, db_session, simple_user, simple_user_password
+):
     """Проверяет частичное обновление текущего пользователя."""
     CHANCE_TO_CHANGE_DATA = 30
     data = {}
@@ -122,9 +124,9 @@ def test_partial_update_user_me(client, access_jwt_token, faker, db_session, sim
     if faker.random_int(1, 100) <= CHANCE_TO_CHANGE_DATA:
         data["middle_name"] = faker.middle_name()
 
-    headers = {"Authorization": f"Bearer {access_jwt_token}"}
+    headers = {"Authorization": f"Bearer {access_jwt_token_simple_user}"}
 
-    response = client.patch(f"/api/v1/users/me/", json=data, headers=headers)
+    response = client.patch("/api/v1/users/me/", json=data, headers=headers)
     print(response.json)
 
     assert response.status_code == HTTPStatus.OK, "Код ответа отличается от ожидаемого"
@@ -155,7 +157,7 @@ def test_partial_update_user_me(client, access_jwt_token, faker, db_session, sim
     if data.get("password") is not None:
         assert simple_user.check_password(data["password"]), "Пароль пользователя не совпадает с переданным"
     else:
-        assert simple_user.check_password(user_password), "Пароль не передавался но был изменен"
+        assert simple_user.check_password(simple_user_password), "Пароль не передавался но был изменен"
 
 
 def test_create_user(client, faker, db_session):
@@ -169,7 +171,7 @@ def test_create_user(client, faker, db_session):
         "middle_name": faker.middle_name(),
     }
 
-    response = client.post(f"/api/v1/users/register/", json=data)
+    response = client.post("/api/v1/users/register/", json=data)
     print(response.json)
 
     assert response.status_code == HTTPStatus.CREATED, "Код ответа отличается от ожидаемого"
