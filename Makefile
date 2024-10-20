@@ -1,7 +1,10 @@
 CONTAINER_NAME = api
 
-start: ## Запустить dev версию задачь
+start: ## Запустить dev версию задач
 	docker compose up --build
+
+prod:
+	docker compose -f docker-compose.prod.yml up --build
 
 bash: ## Открыть оболочку bash в контейнере 'api'
 	docker compose exec $(CONTAINER_NAME) bash
