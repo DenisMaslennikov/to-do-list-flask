@@ -39,3 +39,4 @@ docker compose -p to-do-list-flask-pytest -f docker-compose-pytest.yml down -v
 ```bash 
 docker compose -f docker-compose.prod.yml up --build
 ```
+- Документация будет доступна по адресу http://127.0.0.1:8001/api/apidocs/
