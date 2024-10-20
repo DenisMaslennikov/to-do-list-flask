@@ -153,6 +153,9 @@ instance/*
 .webassets-cache
 .env
 
+# Config folder
+config/*
+
 Makefile
 PROD.md
 README.md
