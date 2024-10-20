@@ -12,7 +12,7 @@ jobs:
     steps:
       # 1. Checkout репозитория
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Установка Docker Compose
       - name: Set up Docker Compose
