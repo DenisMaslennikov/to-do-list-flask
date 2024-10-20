@@ -156,6 +156,15 @@ instance/*
 # Config folder
 config/*
 
+# Github action
+.github/*
+# Git folder
+.git/*
+
+# Editor config
+.editorconfig
+
+
 Makefile
 PROD.md
 README.md
